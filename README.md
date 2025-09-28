@@ -794,3 +794,63 @@ Para transferências de grandes volumes de dados (terabytes a petabytes) de form
 *   **Data Box Heavy:** Um dispositivo grande e robusto com capacidade de até 800 TB para transferir grandes quantidades de dados para o Azure.
 
 O processo envolve solicitar o dispositivo, carregar seus dados e enviá-lo de volta para a Microsoft, que então carrega os dados em sua conta de armazenamento do Azure.
+
+## Segurança na Azure: Serviços e Melhores Práticas
+
+O paradigma de segurança na nuvem opera sob um modelo de responsabilidade compartilhada. Enquanto a Microsoft Azure é responsável pela segurança *da* nuvem (infraestrutura física), o cliente é responsável pela segurança *na* nuvem. Isso inclui a configuração e o gerenciamento adequados dos serviços, a implementação de políticas de segurança e a proteção de dados e aplicações. Este documento detalha os serviços de segurança fundamentais da Azure e as melhores práticas para sua aplicação, com foco em um gerenciamento de identidade e acesso robusto e seguro.
+
+### Gerenciamento de Identidade e Acesso (IAM)
+
+O pilar da postura de segurança na Azure é o Gerenciamento de Identidade e Acesso (IAM). O **Azure Active Directory (Azure AD)** serve como o provedor de identidade centralizado da Microsoft, oferecendo um serviço de diretório multilocatário baseado em nuvem e gerenciamento de identidade.
+
+*   **Azure Role-Based Access Control (RBAC):** O RBAC é o mecanismo utilizado para autorização detalhada aos recursos do Azure. Ele opera através da atribuição de *definições de função* (roles) a *principais de segurança* (usuários, grupos, service principals, managed identities) em um *escopo* definido (Grupo de Gerenciamento, Assinatura, Grupo de Recursos ou Recurso individual). Isso permite a aplicação granular de permissões.
+*   **Princípio do Menor Privilégio (PoLP):** A implementação do PoLP é uma prática de segurança crítica. Deve-se garantir que as identidades recebam apenas o conjunto mínimo de permissões necessárias para executar suas funções designadas. O RBAC é o framework primário para a aplicação técnica deste princípio no ecossistema Azure.
+
+### Autenticação Forte e Acesso Condicional
+
+A proteção da identidade é um vetor de segurança primordial. A simples posse de credenciais não deve garantir o acesso.
+
+#### Azure AD Multi-Factor Authentication (MFA)
+
+A MFA introduz uma camada de segurança adicional ao processo de autenticação, exigindo que o usuário forneça dois ou mais fatores de verificação. Os fatores incluem algo que você sabe (senha), algo que você tem (dispositivo confiável com um aplicativo autenticador) e algo que você é (biometria). Essa abordagem mitiga significativamente o risco de acesso não autorizado decorrente de credenciais comprometidas.
+
+**Aplicação:** A implementação da MFA é mandatória para todas as contas com privilégios administrativos (ex: Administrador Global) e altamente recomendada para todos os usuários do tenant.
+
+#### Acesso Condicional (Conditional Access)
+
+As políticas de Acesso Condicional do Azure AD funcionam como um mecanismo de decisão "If-Then" para a aplicação de políticas de acesso em tempo real. Elas agregam sinais de diversas fontes para tomar decisões de autorização.
+
+*   **Sinais (Condições):** Atributos avaliados durante a tentativa de acesso, como:
+    *   Geolocalização do IP de origem.
+    *   Nível de conformidade do dispositivo (gerenciado por Intune).
+    *   Aplicação de destino.
+    *   Nível de risco do usuário e do login (calculado em tempo real pelo Azure AD Identity Protection).
+*   **Decisões (Controles de Acesso):** Ações impostas com base na avaliação dos sinais:
+    *   **Conceder acesso.**
+    *   **Bloquear acesso.**
+    *   **Conceder acesso, mas exigir controles adicionais**, como MFA ou um dispositivo em conformidade.
+
+**Aplicação:** Utilize o Acesso Condicional para implementar uma estratégia de segurança Zero Trust. Por exemplo, exija MFA para qualquer acesso a portais de gerenciamento ou bloqueie logins de IPs anônimos.
+
+### Acesso Privilegiado e Temporário
+
+A gestão de contas com privilégios elevados (contas administrativas) é crítica para minimizar a superfície de ataque.
+
+#### Azure AD Privileged Identity Management (PIM)
+
+O PIM é um serviço para gerenciar, controlar e monitorar o acesso a funções privilegiadas no Azure AD, Azure e outros serviços Microsoft Online. Ele habilita o acesso privilegiado **Just-In-Time (JIT)** e **Just-Enough-Access (JEA)**.
+
+*   **Acesso Just-In-Time (JIT):** As funções privilegiadas não são permanentes. Os usuários devem solicitar a ativação da função para um período de tempo limitado (time-bound), após o qual as permissões são revogadas automaticamente.
+*   **Fluxos de Aprovação:** A ativação de funções de alto impacto pode ser configurada para exigir a aprovação de um ou mais administradores designados.
+*   **Revisões de Acesso e Auditoria:** O PIM força revisões de acesso periódicas e mantém um log de auditoria detalhado de todas as ativações de funções privilegiadas.
+
+**Aplicação:** Integre o PIM para todas as funções do Azure AD e do Azure RBAC que concedem permissões elevadas. Nenhuma conta deve ter privilégios administrativos permanentes.
+
+#### Azure Bastion e JIT VM Access
+
+O acesso direto a máquinas virtuais via RDP/SSH a partir da internet representa um risco de segurança significativo.
+
+*   **Azure Bastion:** É um serviço de PaaS provisionado em uma VNet que oferece conectividade RDP/SSH segura para VMs na mesma VNet (ou em VNets emparelhadas), diretamente pelo Portal do Azure sobre TLS. Ele elimina a necessidade de expor VMs com endereços IP públicos.
+*   **JIT VM Access (Microsoft Defender for Cloud):** É uma funcionalidade que bloqueia o tráfego de entrada para VMs em nível de Network Security Group (NSG) e fornece acesso sob demanda. Quando solicitado, ele cria uma regra de permissão com escopo para um IP de origem e por um tempo limitado.
+
+**Aplicação:** Implemente o Azure Bastion para centralizar e proteger o acesso de gerenciamento. Utilize o JIT VM Access como uma camada adicional para garantir que as portas de gerenciamento (3389, 22) só sejam abertas quando explicitamente solicitado e para um contexto específico.
