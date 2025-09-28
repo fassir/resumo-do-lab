@@ -753,3 +753,44 @@ A Azure oferece uma variedade de modelos de serviço em nuvem para atender a dif
     *   **Casos de uso:** Processamento de eventos, APIs sem servidor, tarefas agendadas.
 
 É importante notar que, embora o Azure Functions é frequentemente associado ao modelo FaaS, ele também possui características de PaaS devido ao nível de configuração e gerenciamento da plataforma que ainda é necessário. Isso significa que, embora você não precise gerenciar servidores diretamente, ainda precisa configurar e gerenciar a plataforma Azure Functions para garantir que seus aplicativos sejam executados corretamente, incluindo a escolha do plano de hospedagem, configuração de gatilhos e associações, e gerenciamento de dependências.
+
+## Armazenamento na Azure
+
+A plataforma de Armazenamento do Azure é um serviço de nuvem gerenciado pela Microsoft, projetado para suportar aplicações modernas orientadas a dados. Ela provê uma base de armazenamento massivamente escalável, com garantias de alta disponibilidade via SLA, durabilidade por meio de replicação de dados e segurança multicamadas. A plataforma é otimizada para armazenar e processar uma vasta gama de objetos de dados, incluindo dados não estrutururados (Blobs), compartilhamentos de arquivos (Files), mensagens assíncronas (Queues), dados NoSQL (Tables) e discos de bloco para VMs.
+
+### Redundância e Zonas de Disponibilidade
+
+Para garantir a durabilidade e a alta disponibilidade, o Azure replica seus dados. Você pode escolher entre várias opções de redundância:
+
+*   **Armazenamento com Redundância Local (LRS):** Replica seus dados três vezes dentro de um único datacenter na região primária. É a opção de menor custo, mas não protege contra uma falha em nível de datacenter.
+*   **Armazenamento com Redundância de Zona (ZRS):** Replica seus dados de forma síncrona em três Zonas de Disponibilidade do Azure na região primária. Oferece proteção contra falhas de datacenter.
+*   **Armazenamento com Redundância Geográfica (GRS):** Replica seus dados para uma região secundária a centenas de quilômetros de distância da região primária. Oferece proteção contra desastres regionais.
+*   **Armazenamento com Redundância Geográfica e de Zona (GZRS):** Combina a alta disponibilidade do ZRS com a proteção contra desastres regionais do GRS. Os dados são replicados em três Zonas de Disponibilidade na região primária e também replicados de forma assíncrona para uma região secundária.
+
+### Tipos de Armazenamento e Camadas de Acesso
+
+O Azure oferece diferentes tipos de armazenamento para atender a diversas necessidades:
+
+1.  **Armazenamento de Blobs (Blob Storage):** Ideal para armazenar grandes quantidades de dados não estruturados, como texto, imagens e vídeos. Ele oferece diferentes camadas de acesso para otimizar custos:
+    *   **Camada de Acesso Quente (Hot):** Otimizada para armazenar dados que são acessados com frequência.
+    *   **Camada de Acesso Infrequente (Cool):** Para dados com acesso menos frequente, armazenados por pelo menos 30 dias. Custo de armazenamento menor, mas custo de acesso maior que a camada Quente.
+    *   **Camada de Acesso Frio (Cold):** Para dados raramente acessados, armazenados por pelo menos 90 dias. Custos de armazenamento ainda mais baixos, mas custos de acesso mais altos.
+    *   **Camada de Arquivo Morto (Archive):** Para dados raramente acessados com requisitos de latência flexíveis (várias horas), armazenados por pelo menos 180 dias. É a opção de armazenamento de menor custo.
+
+2.  **Arquivos do Azure (Azure Files):** Oferece compartilhamentos de arquivos na nuvem totalmente gerenciados que podem ser acessados por meio dos protocolos SMB e NFS. Permite substituir ou complementar servidores de arquivos locais.
+
+3.  **Armazenamento de Filas (Queue Storage):** Usado para armazenar e recuperar mensagens. É ideal para criar uma lista de trabalhos para processamento assíncrono.
+
+4.  **Armazenamento de Tabelas (Table Storage):** Um serviço NoSQL que armazena dados estruturados não relacionais (JSON estruturado) em um armazenamento de chave/atributo com um design sem esquema.
+
+5.  **Discos do Azure (Azure Disks):** Volumes de armazenamento em nível de bloco para VMs do Azure. Disponíveis como Ultra Disks, SSD Premium, SSD Standard e HDD Standard.
+
+### Azure Data Box
+
+Para transferências de grandes volumes de dados (terabytes a petabytes) de forma rápida, econômica e segura, o Azure oferece a família de produtos **Azure Data Box**. Em vez de depender da Internet, que pode ser lenta ou não confiável para grandes transferências, você pode usar dispositivos físicos:
+
+*   **Data Box Disk:** Discos SSD criptografados com capacidade de até 35 TB para transferências online e offline.
+*   **Data Box:** Um dispositivo de desktop robusto com capacidade de 80 TB para transferir dados para o Azure.
+*   **Data Box Heavy:** Um dispositivo grande e robusto com capacidade de até 800 TB para transferir grandes quantidades de dados para o Azure.
+
+O processo envolve solicitar o dispositivo, carregar seus dados e enviá-lo de volta para a Microsoft, que então carrega os dados em sua conta de armazenamento do Azure.
