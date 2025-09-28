@@ -925,3 +925,72 @@ O resultado detalhará o custo do armazenamento de dados em repouso (por GB/mês
     *   Estime o número de operações de gravação (ex: 100.000) e leitura (ex: 1.000.000) por mês.
 
 A calculadora mostrará o custo mensal para a capacidade de armazenamento e o custo separado para as operações de dados, fornecendo uma visão clara do gasto total.
+
+# Framework de Governança na Azure: Blueprints, Policies, Purview e Locks
+
+A governança na Azure compreende o framework de serviços e processos projetados para estabelecer e manter o controle sobre os ativos de nuvem. A implementação de uma estratégia de governança robusta é imperativa para garantir a conformidade com políticas corporativas e regulatórias, otimizar a alocação de custos (FinOps) e fortalecer a postura de segurança da organização.
+
+## Azure Blueprints: Orquestração de Ambientes em Conformidade
+
+O Azure Blueprints é um serviço de orquestração declarativo que permite a padronização de ambientes Azure em escala. Ele empacota artefatos de governança e infraestrutura em uma única definição, garantindo que as implantações subsequentes adiram consistentemente aos padrões e requisitos organizacionais.
+
+Um blueprint é uma composição dos seguintes artefatos:
+*   **Atribuições de Função (RBAC):** Define o modelo de permissões (identidade e função) no escopo da implantação.
+*   **Atribuições de Política (Azure Policy):** Aplica um conjunto de regras de governança para impor restrições e convenções.
+*   **Modelos do Azure Resource Manager (ARM Templates):** Define a topologia da infraestrutura a ser provisionada.
+*   **Grupos de Recursos:** Estabelece a estrutura de contenção lógica para os recursos.
+
+A publicação de um blueprint cria uma versão imutável que pode ser atribuída a escopos de gerenciamento (assinaturas). O serviço mantém um relacionamento ativo entre a atribuição do blueprint e os recursos implantados, o que permite o rastreamento de conformidade e a execução de atualizações controladas em todos os ambientes derivados da mesma definição.
+
+## Azure Policy: Imposição de Regras e Conformidade em Tempo Real
+
+O Azure Policy é o motor de governança em tempo real da Azure, utilizado para impor políticas organizacionais sobre os recursos. Ele opera avaliando os recursos contra as regras atribuídas durante as operações do Azure Resource Manager (ARM) e em ciclos de avaliação de conformidade contínuos.
+
+### Componentes da Azure Policy
+
+*   **Definição de Política:** Uma regra de negócio, formalizada em JSON, que define uma condição lógica a ser avaliada em um recurso. A definição especifica um efeito que será acionado se a condição for verdadeira.
+*   **Definição de Iniciativa (Policy Set):** Uma coleção de definições de política agrupadas para um objetivo de conformidade unificado (ex: conformidade com o CIS Benchmark ou PCI-DSS). A atribuição de uma iniciativa simplifica o gerenciamento de políticas em larga escala.
+*   **Atribuição:** A aplicação (instanciação) de uma política ou iniciativa a um escopo específico na hierarquia de Grupos de Gerenciamento, Assinatura ou Grupo de Recursos.
+
+### Efeitos da Política
+
+O efeito determina a ação a ser tomada quando a condição da política é satisfeita:
+*   **Deny:** Rejeita a requisição de criação ou atualização do recurso via ARM.
+*   **Audit:** Permite a operação, mas registra um evento de não conformidade nos logs de auditoria.
+*   **Append:** Adiciona campos ao recurso durante uma operação de criação/atualização, garantindo a aplicação de metadados (ex: tags).
+*   **AuditIfNotExists / DeployIfNotExists:** Efeitos mais complexos que avaliam a existência de um recurso relacionado e, respectivamente, auditam ou disparam uma implantação corretiva (remediação) se o recurso não existir. Essencial para garantir a presença de agentes de monitoramento, configurações de diagnóstico, etc.
+*   **Disabled:** Desativa temporariamente a aplicação da regra sem remover a atribuição.
+
+## Microsoft Purview: Governança de Dados Unificada
+
+Enquanto o Azure Policy governa a infraestrutura, o **Microsoft Purview** é a plataforma de governança de dados unificada da Azure, projetada para mapear, catalogar e gerenciar dados em ambientes híbridos e multinuvem.
+
+Suas capacidades fundamentais incluem:
+*   **Data Map:** Cria um grafo de conhecimento dos ativos de dados da organização. Ele automatiza a descoberta e a varredura de fontes de dados (ex: Azure SQL, Data Lake, Power BI, AWS S3) para extrair metadados técnicos.
+*   **Classificação de Dados:** Aplica classificadores baseados em expressões regulares (regex) e machine learning para identificar e rotular automaticamente dados sensíveis, utilizando o framework do Microsoft Information Protection (MIP).
+*   **Linhagem de Dados (Data Lineage):** Visualiza o fluxo de dados de ponta a ponta, desde a origem, passando por processos de ETL/ELT, até os relatórios de consumo. Isso é crucial para análise de impacto e rastreamento de causa raiz.
+*   **Glossário de Negócios:** Permite a criação de um léxico de termos de negócio, associando-os a ativos de dados técnicos para criar uma linguagem comum entre as áreas de negócio e TI.
+
+O Purview é um componente central para estratégias de conformidade com regulamentações como LGPD/GDPR, pois fornece os mecanismos para descobrir, classificar e entender o ciclo de vida dos dados pessoais.
+
+## Portal de Confiança do Serviço (Service Trust Portal)
+
+O **Service Trust Portal** é o repositório público da Microsoft que fornece documentação sobre a postura de segurança, privacidade e conformidade da plataforma Azure. Ele serve como uma ferramenta de due diligence para que os clientes possam auditar a Microsoft.
+
+O portal oferece acesso a:
+*   **Relatórios de Auditoria de Terceiros:** Relatórios de certificação e atestação como ISO/IEC 27001, SOC (System and Organization Controls) 1, 2 e 3, e PCI DSS.
+*   **Documentação de Conformidade:** Guias detalhados sobre como a Azure atende aos requisitos de regulamentações específicas da indústria e geográficas.
+*   **Avaliações de Risco e Whitepapers:** Análises aprofundadas sobre as práticas operacionais e de segurança da Microsoft.
+
+## Bloqueios de Recurso (Resource Locks)
+
+Bloqueios de Recurso são um mecanismo de controle do ARM para proteger recursos contra modificações ou exclusões inadvertidas. Um bloqueio é um recurso independente (`Microsoft.Authorization/locks`) que, quando aplicado a um escopo, sobrepõe-se às permissões do RBAC.
+
+Existem dois níveis de bloqueio:
+*   **CanNotDelete:** Impede operações de exclusão (`Microsoft.Authorization/*/delete`). Modificações e leituras ainda são permitidas.
+*   **ReadOnly:** Impede qualquer operação de modificação ou exclusão, permitindo apenas operações de leitura. Efetivamente, restringe todos os principais de segurança à função de `Leitor` no escopo do bloqueio.
+
+Os bloqueios são herdados hierarquicamente. Um bloqueio `ReadOnly` em uma assinatura torna todos os recursos nela somente leitura. Mesmo um usuário com a função `Owner` não pode excluir um recurso bloqueado sem primeiro remover o bloqueio, o que exige a permissão `Microsoft.Authorization/locks/*`.
+*   **ReadOnly (Somente leitura):** Usuários autorizados podem apenas ler o recurso. Todas as operações de modificação e exclusão são bloqueadas. Este bloqueio é análogo a conceder a todos os usuários a permissão de `Leitor`.
+
+Os bloqueios são herdados. Se você aplicar um bloqueio `ReadOnly` a um grupo de recursos, todos os recursos dentro dele se tornarão somente leitura. É importante notar que os bloqueios se aplicam a todos os usuários, incluindo administradores (proprietários da assinatura). Para realizar uma alteração em um recurso bloqueado, o bloqueio deve ser removido primeiro por um usuário com as permissões necessárias (`Microsoft.Authorization/locks/*`).
